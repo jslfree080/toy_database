@@ -2,10 +2,9 @@ use diesel::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::schema::articles;
 use crate::db_connection::establish_connection;
+use crate::schema::articles::dsl::*;
 
-#[derive(Queryable, Selectable, Serialize, Deserialize)]
-#[diesel(table_name = articles)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct Article {
     pub id: i32,
     pub title: String,
@@ -25,16 +24,12 @@ pub struct ArticleList(pub Vec<Article>);
 
 impl ArticleList {
     pub fn list() -> Self {
+        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
 
-        use crate::schema::articles::dsl::*;
-
-        let mut connection = establish_connection();
-
-        let result = 
-            articles
-                .limit(10)
-                .load::<Article>(&mut connection)
-                .expect("Error loading articles");
+        let result = articles
+                        .limit(10)
+                        .load::<Article>(&mut connection) // diesel::pg::PgConnection is treated as mutable
+                        .expect("Error loading articles");
 
         ArticleList(result)
     }

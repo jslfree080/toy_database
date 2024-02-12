@@ -1,16 +1,8 @@
-use actix_web::{Responder, HttpResponse };
-use serde_json::to_string;
+use actix_web::{ Responder, HttpResponse };
 use crate::models::article::ArticleList;
 
 pub async fn index() -> impl Responder {
-    let article_list = ArticleList::list();
-    match to_string(&article_list) {
-        Ok(json) => HttpResponse::Ok()
-                        .content_type("application/json")
-                        .body(json),
-        Err(_) => HttpResponse::InternalServerError()
-                        .finish(),
-    }
+    HttpResponse::Ok().json(ArticleList::list())
 }
 
 /*
