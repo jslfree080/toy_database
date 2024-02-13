@@ -12,11 +12,20 @@ pub struct Article {
     pub published: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize)]
 #[diesel(table_name = articles)]
 pub struct NewArticle {
     pub title: Option<String>,
     pub body: Option<String>,
+}
+
+impl NewArticle {
+    pub fn create(&self) -> Result<Article, diesel::result::Error> {
+        let mut connection = establish_connection();
+        diesel::insert_into(articles::table)
+            .values(self)
+            .get_result(&mut connection)
+    }
 }
 
 #[derive(Serialize, Deserialize)] 
