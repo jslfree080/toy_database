@@ -1,6 +1,7 @@
 use actix_web::{ Responder, HttpResponse, web, Error };
 use crate::models::article::ArticleList;
 use crate::models::article::NewArticle;
+use crate::models::article::Article;
 
 pub async fn index() -> impl Responder {
     HttpResponse::Ok().json(ArticleList::list())
@@ -13,6 +14,12 @@ pub async fn create(new_article: web::Json<NewArticle>) -> Result<HttpResponse, 
         .map(|article| HttpResponse::Ok().json(article))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
+
+pub async fn show(article_id: web::Path<i32>) -> Result<HttpResponse, Error> {
+    Article::find(&article_id)
+        .map(|article| HttpResponse::Ok().json(article))
+        .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
+} 
 
 /*
 psql -U postgres -d toy_database -c "INSERT INTO articles(title, body) VALUES ('First article', 'This is my first article.'); INSERT INTO articles(title, body) VALUES ('Second article', 'What is inside of http://localhost:8080/articles ?');"

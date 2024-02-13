@@ -15,6 +15,7 @@ async fn main() -> std::io::Result<()> {
             .service(hello)
             .route("/articles", web::get().to(handlers::articles::index)) // http://127.0.0.1:8080/articles
             .route("/articles", web::post().to(handlers::articles::create))
+            .route("/articles/{article_id}", web::get().to(handlers::articles::show)) // http://127.0.0.1:8080/articles/3
     })
     .bind(("127.0.0.1", 8080))?
     .run()

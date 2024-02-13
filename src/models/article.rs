@@ -12,6 +12,15 @@ pub struct Article {
     pub published: bool,
 }
 
+impl Article {
+    pub fn find(article_id: &i32) -> Result<Article, diesel::result::Error> {
+        let mut connection = establish_connection();
+        articles::table
+            .find(article_id)
+            .first(&mut connection)
+    }
+}
+
 #[derive(Insertable, Deserialize)]
 #[diesel(table_name = articles)]
 pub struct NewArticle {
