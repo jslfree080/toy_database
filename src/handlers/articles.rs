@@ -52,4 +52,5 @@ curl -X DELETE http://127.0.0.1:8080/articles/1 -H "Content-Type: application/js
 /*
 cargo run
 curl -X PATCH http://127.0.0.1:8080/articles/3 -H "Content-Type: application/json" -d '{"body": "This is an attempt to update the previous article."}'
+// {"id":3,"title":"Third article","body":"This is an attempt to update the previous article.","published":false}
 */
