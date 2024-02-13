@@ -14,10 +14,20 @@ pub struct Article {
 
 impl Article {
     pub fn find(article_id: &i32) -> Result<Article, diesel::result::Error> {
-        let mut connection = establish_connection();
+        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
         articles::table
             .find(article_id)
-            .first(&mut connection)
+            .first(&mut connection) // diesel::pg::PgConnection is treated as mutable
+    }
+
+    pub fn destroy(article_id: &i32) -> Result<(), diesel::result::Error> {
+        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
+        diesel::delete(
+            articles
+                .find(article_id)
+        )
+        .execute(&mut connection)?;
+        Ok(())
     }
 }
 
