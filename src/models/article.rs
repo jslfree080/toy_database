@@ -26,12 +26,23 @@ impl Article {
             articles
                 .find(article_id)
         )
-        .execute(&mut connection)?;
+        .execute(&mut connection)?; // diesel::pg::PgConnection is treated as mutable
+        Ok(())
+    }
+
+    pub fn update(article_id: &i32, new_article: &NewArticle) -> Result<(), diesel::result::Error> {
+        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
+        diesel::update(
+            articles
+                .find(article_id)
+        )
+        .set(new_article)
+        .execute(&mut connection)?; // diesel::pg::PgConnection is treated as mutable
         Ok(())
     }
 }
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, Deserialize, AsChangeset)]
 #[diesel(table_name = articles)]
 pub struct NewArticle {
     pub title: Option<String>,
@@ -40,10 +51,10 @@ pub struct NewArticle {
 
 impl NewArticle {
     pub fn create(&self) -> Result<Article, diesel::result::Error> {
-        let mut connection = establish_connection();
+        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
         diesel::insert_into(articles::table)
             .values(self)
-            .get_result(&mut connection)
+            .get_result(&mut connection) // diesel::pg::PgConnection is treated as mutable
     }
 }
 
