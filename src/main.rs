@@ -8,12 +8,13 @@ async fn hello() -> impl Responder {
 }
 
 #[actix_web::main]
+#[allow(deprecated)]
 async fn main() -> std::io::Result<()> {
     println!("Starting Rust Actix-web server at 127.0.0.1:8080");
 
     HttpServer::new(|| {
         App::new()
-            .app_data(establish_connection())
+            .data(establish_connection())
             .service(hello)
             .service(
                 web::resource("/articles")
