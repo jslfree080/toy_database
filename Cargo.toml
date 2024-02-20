@@ -6,7 +6,7 @@ description = "A toy project to test the creation of REST API endpoints using a 
 
 [dependencies]
 actix-web = "4.5.1"
-diesel = { version = "2.1.0", features = ["postgres"] }
+diesel = { version = "2.1.0", features = ["postgres", "r2d2"] }
 dotenvy = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
