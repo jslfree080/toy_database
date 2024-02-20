@@ -16,7 +16,7 @@ impl Article {
     pub fn find(article_id: &i32, connection: &PgConnection) -> Result<Article, diesel::result::Error> {
         articles::table
             .find(article_id)
-            .first(connection)
+            .first(connection) //
     }
 
     pub fn destroy(article_id: &i32, connection: &PgConnection) -> Result<(), diesel::result::Error> {
@@ -24,7 +24,7 @@ impl Article {
             articles
                 .find(article_id)
         )
-        .execute(connection)?;
+        .execute(connection)?; //
         Ok(())
     }
 
@@ -34,7 +34,7 @@ impl Article {
                 .find(article_id)
         )
         .set(new_article)
-        .execute(connection)?;
+        .execute(connection)?; //
         Ok(())
     }
 }
@@ -50,7 +50,7 @@ impl NewArticle {
     pub fn create(&self, connection: &PgConnection) -> Result<Article, diesel::result::Error> {
         diesel::insert_into(articles::table)
             .values(self)
-            .get_result(connection) // diesel::pg::PgConnection is treated as mutable
+            .get_result(connection) //
     }
 }
 
@@ -62,7 +62,7 @@ impl ArticleList {
 
         let result = articles
                         .limit(10)
-                        .load::<Article>(connection)
+                        .load::<Article>(connection) //
                         .expect("Error loading articles");
 
         ArticleList(result)
