@@ -1,8 +1,8 @@
 use diesel::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::schema::articles;
-use crate::db_connection::establish_connection;
 use crate::schema::articles::dsl::*;
+use diesel::PgConnection;
 
 #[derive(Queryable, Serialize, Deserialize)]
 pub struct Article {
@@ -13,31 +13,28 @@ pub struct Article {
 }
 
 impl Article {
-    pub fn find(article_id: &i32) -> Result<Article, diesel::result::Error> {
-        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
+    pub fn find(article_id: &i32, connection: &PgConnection) -> Result<Article, diesel::result::Error> {
         articles::table
             .find(article_id)
-            .first(&mut connection) // diesel::pg::PgConnection is treated as mutable
+            .first(connection)
     }
 
-    pub fn destroy(article_id: &i32) -> Result<(), diesel::result::Error> {
-        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
+    pub fn destroy(article_id: &i32, connection: &PgConnection) -> Result<(), diesel::result::Error> {
         diesel::delete(
             articles
                 .find(article_id)
         )
-        .execute(&mut connection)?; // diesel::pg::PgConnection is treated as mutable
+        .execute(connection)?;
         Ok(())
     }
 
-    pub fn update(article_id: &i32, new_article: &NewArticle) -> Result<(), diesel::result::Error> {
-        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
+    pub fn update(article_id: &i32, new_article: &NewArticle, connection: &PgConnection) -> Result<(), diesel::result::Error> {
         diesel::update(
             articles
                 .find(article_id)
         )
         .set(new_article)
-        .execute(&mut connection)?; // diesel::pg::PgConnection is treated as mutable
+        .execute(connection)?;
         Ok(())
     }
 }
@@ -50,11 +47,10 @@ pub struct NewArticle {
 }
 
 impl NewArticle {
-    pub fn create(&self) -> Result<Article, diesel::result::Error> {
-        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
+    pub fn create(&self, connection: &PgConnection) -> Result<Article, diesel::result::Error> {
         diesel::insert_into(articles::table)
             .values(self)
-            .get_result(&mut connection) // diesel::pg::PgConnection is treated as mutable
+            .get_result(connection) // diesel::pg::PgConnection is treated as mutable
     }
 }
 
@@ -62,12 +58,11 @@ impl NewArticle {
 pub struct ArticleList(pub Vec<Article>);
 
 impl ArticleList {
-    pub fn list() -> Self {
-        let mut connection = establish_connection(); // diesel::pg::PgConnection is treated as mutable
+    pub fn list(connection: &PgConnection) -> Self {
 
         let result = articles
                         .limit(10)
-                        .load::<Article>(&mut connection) // diesel::pg::PgConnection is treated as mutable
+                        .load::<Article>(connection)
                         .expect("Error loading articles");
 
         ArticleList(result)
