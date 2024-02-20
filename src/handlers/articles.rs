@@ -1,34 +1,46 @@
-use actix_web::{ Responder, HttpResponse, web, Error };
+use actix_web::{ HttpResponse, web, Error };
 use crate::models::article::ArticleList;
 use crate::models::article::NewArticle;
 use crate::models::article::Article;
+use crate::db_connection::{ PgPool, PgPooledConnection };
 
-pub async fn index() -> impl Responder {
-    HttpResponse::Ok().json(ArticleList::list())
+fn pg_pool_handler(pool: web::Data<PgPool>) -> Result<PgPooledConnection, Error> {
+    pool
+    .get()
+    .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
 
-pub async fn create(new_article: web::Json<NewArticle>) -> Result<HttpResponse, Error> {
+pub async fn index(pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Ok(HttpResponse::Ok().json(ArticleList::list(&mut *pg_pool)))
+}
+
+pub async fn create(new_article: web::Json<NewArticle>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
+    let mut pg_pool = pg_pool_handler(pool)?;
     new_article
         .into_inner()
-        .create()
+        .create(&mut *pg_pool)
         .map(|article| HttpResponse::Ok().json(article))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
 
-pub async fn show(article_id: web::Path<i32>) -> Result<HttpResponse, Error> {
-    Article::find(&article_id)
+pub async fn show(article_id: web::Path<i32>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Article::find(&article_id, &mut *pg_pool)
         .map(|article| HttpResponse::Ok().json(article))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 } 
 
-pub async fn destroy(article_id: web::Path<i32>) -> Result<HttpResponse, Error> {
-    Article::destroy(&article_id)
+pub async fn destroy(article_id: web::Path<i32>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Article::destroy(&article_id, &mut *pg_pool)
         .map(|_| HttpResponse::Ok().json(()))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
 
-pub async fn update(article_id: web::Path<i32>, new_article: web::Json<NewArticle>) -> Result<HttpResponse, Error> {
-    Article::update(&article_id, &new_article)
+pub async fn update(article_id: web::Path<i32>, new_article: web::Json<NewArticle>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Article::update(&article_id, &new_article, &mut *pg_pool)
         .map(|_| HttpResponse::Ok().json(()))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
