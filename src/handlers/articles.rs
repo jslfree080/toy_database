@@ -10,37 +10,37 @@ fn pg_pool_handler(pool: web::Data<PgPool>) -> Result<PgPooledConnection, Error>
     .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
 
-pub async fn index(pool: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
-    let pg_pool = pg_pool_handler(pool)?;
-    Ok(HttpResponse::Ok().json(ArticleList::list(&pg_pool)))
+pub async fn index(pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Ok(HttpResponse::Ok().json(ArticleList::list(&mut *pg_pool)))
 }
 
 pub async fn create(new_article: web::Json<NewArticle>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
-    let pg_pool = pg_pool_handler(pool)?;
+    let mut pg_pool = pg_pool_handler(pool)?;
     new_article
         .into_inner()
-        .create(&pg_pool)
+        .create(&mut *pg_pool)
         .map(|article| HttpResponse::Ok().json(article))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
 
 pub async fn show(article_id: web::Path<i32>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
-    let pg_pool = pg_pool_handler(pool)?;
-    Article::find(&article_id, &pg_pool)
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Article::find(&article_id, &mut *pg_pool)
         .map(|article| HttpResponse::Ok().json(article))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 } 
 
 pub async fn destroy(article_id: web::Path<i32>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
-    let pg_pool = pg_pool_handler(pool)?;
-    Article::destroy(&article_id, &pg_pool)
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Article::destroy(&article_id, &mut *pg_pool)
         .map(|_| HttpResponse::Ok().json(()))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }
 
 pub async fn update(article_id: web::Path<i32>, new_article: web::Json<NewArticle>, pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
-    let pg_pool = pg_pool_handler(pool)?;
-    Article::update(&article_id, &new_article, &pg_pool)
+    let mut pg_pool = pg_pool_handler(pool)?;
+    Article::update(&article_id, &new_article, &mut *pg_pool)
         .map(|_| HttpResponse::Ok().json(()))
         .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))
 }

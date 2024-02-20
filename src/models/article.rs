@@ -13,13 +13,13 @@ pub struct Article {
 }
 
 impl Article {
-    pub fn find(article_id: &i32, connection: &PgConnection) -> Result<Article, diesel::result::Error> {
+    pub fn find(article_id: &i32, connection: &mut PgConnection) -> Result<Article, diesel::result::Error> {
         articles::table
             .find(article_id)
             .first(connection) //
     }
 
-    pub fn destroy(article_id: &i32, connection: &PgConnection) -> Result<(), diesel::result::Error> {
+    pub fn destroy(article_id: &i32, connection: &mut PgConnection) -> Result<(), diesel::result::Error> {
         diesel::delete(
             articles
                 .find(article_id)
@@ -28,7 +28,7 @@ impl Article {
         Ok(())
     }
 
-    pub fn update(article_id: &i32, new_article: &NewArticle, connection: &PgConnection) -> Result<(), diesel::result::Error> {
+    pub fn update(article_id: &i32, new_article: &NewArticle, connection: &mut PgConnection) -> Result<(), diesel::result::Error> {
         diesel::update(
             articles
                 .find(article_id)
@@ -47,7 +47,7 @@ pub struct NewArticle {
 }
 
 impl NewArticle {
-    pub fn create(&self, connection: &PgConnection) -> Result<Article, diesel::result::Error> {
+    pub fn create(&self, connection: &mut PgConnection) -> Result<Article, diesel::result::Error> {
         diesel::insert_into(articles::table)
             .values(self)
             .get_result(connection) //
@@ -58,7 +58,7 @@ impl NewArticle {
 pub struct ArticleList(pub Vec<Article>);
 
 impl ArticleList {
-    pub fn list(connection: &PgConnection) -> Self {
+    pub fn list(connection: &mut PgConnection) -> Self {
 
         let result = articles
                         .limit(10)
