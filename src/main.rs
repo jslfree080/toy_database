@@ -1,6 +1,6 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use toy_database::handlers;
 use toy_database::db_connection::establish_connection;
+use toy_database::handlers;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -19,13 +19,13 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::resource("/articles")
                     .route(web::get().to(handlers::articles::index)) // http://127.0.0.1:8080/articles
-                    .route(web::post().to(handlers::articles::create))
+                    .route(web::post().to(handlers::articles::create)),
             )
             .service(
                 web::resource("/articles/{article_id}")
                     .route(web::get().to(handlers::articles::show)) // http://127.0.0.1:8080/articles/3
                     .route(web::delete().to(handlers::articles::destroy))
-                    .route(web::patch().to(handlers::articles::update)) // http://127.0.0.1:8080/articles/3
+                    .route(web::patch().to(handlers::articles::update)), // http://127.0.0.1:8080/articles/3
             )
     })
     .bind(("127.0.0.1", 8080))?

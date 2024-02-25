@@ -1,8 +1,8 @@
-use diesel::prelude::*;
-use serde::{Serialize, Deserialize};
 use crate::schema::articles;
 use crate::schema::articles::dsl::*;
+use diesel::prelude::*;
 use diesel::PgConnection;
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Serialize, Deserialize)]
 pub struct Article {
@@ -13,28 +13,29 @@ pub struct Article {
 }
 
 impl Article {
-    pub fn find(article_id: &i32, connection: &mut PgConnection) -> Result<Article, diesel::result::Error> {
-        articles::table
-            .find(article_id)
-            .first(connection) //
+    pub fn find(
+        article_id: &i32,
+        connection: &mut PgConnection,
+    ) -> Result<Article, diesel::result::Error> {
+        articles::table.find(article_id).first(connection) //
     }
 
-    pub fn destroy(article_id: &i32, connection: &mut PgConnection) -> Result<(), diesel::result::Error> {
-        diesel::delete(
-            articles
-                .find(article_id)
-        )
-        .execute(connection)?; //
+    pub fn destroy(
+        article_id: &i32,
+        connection: &mut PgConnection,
+    ) -> Result<(), diesel::result::Error> {
+        diesel::delete(articles.find(article_id)).execute(connection)?; //
         Ok(())
     }
 
-    pub fn update(article_id: &i32, new_article: &NewArticle, connection: &mut PgConnection) -> Result<(), diesel::result::Error> {
-        diesel::update(
-            articles
-                .find(article_id)
-        )
-        .set(new_article)
-        .execute(connection)?; //
+    pub fn update(
+        article_id: &i32,
+        new_article: &NewArticle,
+        connection: &mut PgConnection,
+    ) -> Result<(), diesel::result::Error> {
+        diesel::update(articles.find(article_id))
+            .set(new_article)
+            .execute(connection)?; //
         Ok(())
     }
 }
@@ -54,16 +55,15 @@ impl NewArticle {
     }
 }
 
-#[derive(Serialize, Deserialize)] 
+#[derive(Serialize, Deserialize)]
 pub struct ArticleList(pub Vec<Article>);
 
 impl ArticleList {
     pub fn list(connection: &mut PgConnection) -> Self {
-
         let result = articles
-                        .limit(10)
-                        .load::<Article>(connection) //
-                        .expect("Error loading articles");
+            .limit(10)
+            .load::<Article>(connection) //
+            .expect("Error loading articles");
 
         ArticleList(result)
     }
